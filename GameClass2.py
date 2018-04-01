@@ -10,7 +10,6 @@ import pymunk
 from pymunk.vec2d import Vec2d
 import pymunk.pygame_util
 
-
 # PyGame init
 width = 1200
 height = 900
