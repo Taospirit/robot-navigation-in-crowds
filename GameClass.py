@@ -108,6 +108,7 @@ class GameClass:
         # obs_body = pymunk.Body(mass, inertia)
 
         obs_body = pymunk.Body(body_type=pymunk.Body.STATIC)
+
         obs_body.position = x, y
         obs_shape = pymunk.Circle(obs_body, radius, (0, 0))
         obs_shape.color = THECOLORS["blue"]
@@ -160,6 +161,7 @@ class GameClass:
         distance2goal = self.robot_body.position.get_distance(self.goal.position)
         if distance2goal <= robot_radius + self.goal_radius + 5:
             screen.fill(THECOLORS["yellow"])
+            self.reach_goal = 1
             return True
         else:
             return False
@@ -169,7 +171,7 @@ class GameClass:
         distance2goal = self.robot_body.position.get_distance(self.goal.position)
         if self.check_reach_goal():
             reward = 10000
-        reward -= int(distance2goal/math.sqrt(width**2 + height**2) * 400)
+        reward -= int(distance2goal/math.sqrt(width**2 + height**2) * 600)
         for d in readings:
             if d != -100: # the reading is valid
                 reward += int(200/(sensor_range-robot_radius) * d - 200)
@@ -210,7 +212,8 @@ class GameClass:
         readings = self.get_sensor_data()
         state = np.array(readings).reshape((self.num_obstacles,))
         reward = self.get_reward(readings)
-
+        # print("state:",state)
+        print("action: %d, reward: %f, reach goal? %d" % (action, reward,self.reach_goal))
         return reward, state
 
     def update(self, fps):
@@ -244,6 +247,5 @@ if __name__ == "__main__":
         # else:
         #     action = 2
         reward, state = game_class.second_step(random.randint(0, 2))
-        print(state)
-        # print(reward)
+
 #test
