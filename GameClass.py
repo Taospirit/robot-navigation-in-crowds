@@ -159,7 +159,7 @@ class GameClass:
 
     def check_reach_goal(self):
         distance2goal = self.robot_body.position.get_distance(self.goal.position)
-        if distance2goal <= robot_radius + self.goal_radius + 5:
+        if distance2goal <= (robot_radius + self.goal_radius + 5):
             screen.fill(THECOLORS["yellow"])
             self.reach_goal = 1
             return True
@@ -182,7 +182,17 @@ class GameClass:
         self.update(self.fps)
         self.num_steps += 1
 
-        # Manually control the robot's action
+        # Align the robot's pointing angle to its velocity
+        r_v = self.robot_body.velocity.get_length()
+        r_vx = self.robot_body.velocity.x
+        r_vy = self.robot_body.velocity.y
+        if r_v != 0:
+            if r_vx >= 0:
+                self.robot_body.angle = math.asin(r_vy / r_v)
+            else:
+                self.robot_body.angle = math.pi - math.asin(r_vy / r_v)
+
+        # Manually control the robot's action for debuging
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_RIGHT:
                 self.robot_body.velocity = self.robot_body.velocity.rotated_degrees(-45)
@@ -217,23 +227,14 @@ class GameClass:
         return reward, state
 
     def update(self, fps):
-        for i in range(fps):
-            screen.fill(THECOLORS["white"])
-            self.space.debug_draw(self.draw_options)
-            self.space.step(1 / fps)
-            if self.draw_screen:
-                pygame.display.flip()
-            clock.tick(fps)
+        screen.fill(THECOLORS["white"])
+        self.space.debug_draw(self.draw_options)
+        self.space.step(1 / fps)
+        if self.draw_screen:
+            pygame.display.flip()
+        clock.tick(fps)
 
-            # Align the robot's pointing angle to its velocity
-            r_v = self.robot_body.velocity.get_length()
-            r_vx = self.robot_body.velocity.x
-            r_vy = self.robot_body.velocity.y
-            if r_v != 0:
-                if r_vx >= 0:
-                    self.robot_body.angle = math.asin(r_vy / r_v)
-                else:
-                    self.robot_body.angle = math.pi - math.asin(r_vy / r_v)
+
 
 if __name__ == "__main__":
 
@@ -241,11 +242,14 @@ if __name__ == "__main__":
 
     # Game loop
     while True:
-        # action = 2
-        # if game_class.num_steps % 100 ==0:
-        #     action = random.randint(0, 2)
-        # else:
-        #     action = 2
-        reward, state = game_class.second_step(random.randint(0, 2))
+        action = 2
+        if game_class.num_steps % 100 ==0:
+            action = random.randint(0, 2)
+        else:
+            action = 2
+        reward, state = game_class.second_step(action)
+
+        # reward, state = game_class.second_step(random.randint(0, 2))
+        # reward, state = game_class.second_step(2)
 
 #test

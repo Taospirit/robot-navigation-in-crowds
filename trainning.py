@@ -10,18 +10,18 @@ import timeit
 TUNING = False
 GAMMA = 0.9
 NUM_INPUT = 10
-
+fps = 40
 def train(model, params):
     EPSILON = 1
     batchSize = params['batchSize']
     buffer = params['buffer']
     epochs = 10
-    MAX_FRAMES = 120
+    MAX_FRAMES = 100
 
     for i in range(epochs):
 
         # Create a new game instance.
-        game_object = GameClass(False,40)
+        game_object = GameClass(False,fps)
 
         # Get initial state by doing nothing and getting the state.
         reward, state = game_object.second_step((2))
@@ -41,7 +41,14 @@ def train(model, params):
             else:  # choose best action from Q(s,a) values
                 action = (np.argmax(qval))
             # Take action, observe new state and reward
-            reward, new_state = game_object.second_step(action)
+            game_object.second_step(action)
+            for j in range(fps):
+                if j == 0:
+                    game_object.second_step(action)
+                elif j < fps-1:
+                    game_object.second_step(2)
+                else:
+                    reward, new_state = game_object.second_step(2)
             num_frames+=1
             print('Epoch %d: num_frames:%d' % (i,num_frames))
             # Get max_Q(S',a)
@@ -66,7 +73,7 @@ def train(model, params):
 
             if EPSILON > 0.1:
                 EPSILON -= (1 / MAX_FRAMES)
-    model.save_weights('saved-models/nn_model.h5',overwrite=True)
+    model.save_weights('saved-models/nn_model_2.h5',overwrite=True)
     return model
 
 if __name__ == "__main__":
@@ -92,7 +99,7 @@ if __name__ == "__main__":
             train(model, param_set)
 
     else:
-        nn_param = [20, 40]
+        nn_param = [256, 256]
         params = {
             "batchSize": 40,
             "buffer": 10000,

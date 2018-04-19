@@ -7,12 +7,12 @@ import numpy as np
 from nn import neural_net
 
 NUM_INPUT = 10
-
+fps = 40
 
 def play(model):
 
     car_distance = 0
-    game_object = GameClass(True,60)
+    game_object = GameClass(True,fps)
 
     # Do nothing to get initial.
     _, state = game_object.second_step((2))
@@ -36,7 +36,7 @@ def play(model):
 
 
 if __name__ == "__main__":
-    saved_model = 'saved-models/nn_model.h5'
-    model = neural_net(NUM_INPUT, [20,40])
+    saved_model = 'saved-models/nn_model_2.h5'
+    model = neural_net(NUM_INPUT, [256,256])
     model.load_weights(saved_model)
     play(model)

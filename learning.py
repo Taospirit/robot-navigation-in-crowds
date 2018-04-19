@@ -8,16 +8,16 @@ import timeit
 
 NUM_INPUT = 10
 GAMMA = 0.9  # Forgetting.
-TUNING = False  # If False, just use arbitrary, pre-selected params.
+TUNING = True  # If False, just use arbitrary, pre-selected params.
 
 
 def train_net(model, params):
 
     filename = params_to_filename(params)
 
-    observe = 1000  # Number of frames to observe before training.
+    observe = 100  # Number of frames to observe before training.
     epsilon = 1
-    train_frames = 100000  # Number of frames to play.
+    train_frames = 1000  # Number of frames to play.
     batchSize = params['batchSize']
     buffer = params['buffer']
 
@@ -31,7 +31,7 @@ def train_net(model, params):
     loss_log = []
 
     # Create a new game instance.
-    game_object = GameClass()
+    game_object = GameClass(False,30)
 
     # Get initial state by doing nothing and getting the state.
     reward, state = game_object.second_step((2))
@@ -51,7 +51,7 @@ def train_net(model, params):
             action = np.random.randint(0, 3)  # random
         else:
             # Get Q values for each action.
-            qval = model.predict(state, batch_size=1)
+            qval = model.predict(state.reshape(1, NUM_INPUT), batch_size=1)
             action = (np.argmax(qval))  # best
 
         # Take action, observe new state and get our treat.
@@ -72,7 +72,7 @@ def train_net(model, params):
             minibatch = random.sample(replay, batchSize)
 
             # Get training values.
-            X_train, y_train = process_minibatch(minibatch, model)
+            X_train, y_train = process_minibatch2(minibatch, model)
 
             # Train the model on this batch.
             history = LossHistory()
@@ -90,7 +90,7 @@ def train_net(model, params):
             epsilon -= (1.0/train_frames)
 
         # We achieved the goal
-        if game_object.check_reach_goal():
+        if reward > 9000:
             # Log the car's distance at this T.
             data_collect.append([t, car_distance])
 
@@ -110,8 +110,8 @@ def train_net(model, params):
             break
             # start_time = timeit.default_timer()
 
-        # Save the model every 25,000 frames.
-        if t % 25000 == 0:
+        # Save the model every 25 frames.
+        if t % 25 == 0:
             model.save_weights('saved-models/' + filename + '-' +
                                str(t) + '.h5',
                                overwrite=True)
@@ -123,11 +123,11 @@ def train_net(model, params):
 
 def log_results(filename, data_collect, loss_log):
     # Save the results to a file so we can graph it later.
-    with open('results/sonar-frames/learn_data-' + filename + '.csv', 'w') as data_dump:
+    with open('results/learn_data-' + filename + '.csv', 'w') as data_dump:
         wr = csv.writer(data_dump)
         wr.writerows(data_collect)
 
-    with open('results/sonar-frames/loss_data-' + filename + '.csv', 'w') as lf:
+    with open('results/loss_data-' + filename + '.csv', 'w') as lf:
         wr = csv.writer(lf)
         for loss_item in loss_log:
             wr.writerow(loss_item)
@@ -143,17 +143,17 @@ def process_minibatch2(minibatch, model):
 
     mb_len = len(minibatch)
 
-    old_states = np.zeros(shape=(mb_len, 2))
+    old_states = np.zeros(shape=(mb_len, NUM_INPUT))
     actions = np.zeros(shape=(mb_len,))
     rewards = np.zeros(shape=(mb_len,))
-    new_states = np.zeros(shape=(mb_len, 2))
+    new_states = np.zeros(shape=(mb_len, NUM_INPUT))
 
     for i, m in enumerate(minibatch):
         old_state_m, action_m, reward_m, new_state_m = m
-        old_states[i, :] = old_state_m[...]
+        old_states[i, :] = old_state_m[:,]
         actions[i] = action_m
         rewards[i] = reward_m
-        new_states[i, :] = new_state_m[...]
+        new_states[i, :] = new_state_m[:,]
 
     old_qvals = model.predict(old_states, batch_size=mb_len)
     new_qvals = model.predict(new_states, batch_size=mb_len)
@@ -182,10 +182,10 @@ def process_minibatch(minibatch, model):
         # Get stored values.
         old_state_m, action_m, reward_m, new_state_m = memory
         # Get prediction on old state.
-        print(old_state_m.shape)
-        old_qval = model.predict(old_state_m, batch_size=1)
+
+        old_qval = model.predict(old_state_m.reshape(1, NUM_INPUT), batch_size=1)
         # Get prediction on new state.
-        newQ = model.predict(new_state_m, batch_size=1)
+        newQ = model.predict(new_state_m.reshape(1, NUM_INPUT), batch_size=1)
         # Get our predicted best move.
         maxQ = np.max(newQ)
         y = np.zeros((1, 3))
@@ -215,10 +215,10 @@ def launch_learn(params):
     filename = params_to_filename(params)
     print("Trying %s" % filename)
     # Make sure we haven't run this one.
-    if not os.path.isfile('results/sonar-frames/loss_data-' + filename + '.csv'):
+    if not os.path.isfile('results/loss_data-' + filename + '.csv'):
         # Create file so we don't double test when we run multiple
         # instances of the script at the same time.
-        open('results/sonar-frames/loss_data-' + filename + '.csv', 'a').close()
+        open('results/loss_data-' + filename + '.csv', 'a').close()
         print("Starting test.")
         # Train.
         model = neural_net(NUM_INPUT, params['nn'])
