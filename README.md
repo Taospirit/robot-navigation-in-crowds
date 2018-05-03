@@ -96,5 +96,5 @@ The neural network model has two hidden layer. The first layer has input size of
 
 ## Experiments
 ### Tranning process
-
+$Y_k=\frac{1}{2r}\sum_{m=-r}^r y_{k+m}$
 ### Testing process

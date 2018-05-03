@@ -22,10 +22,10 @@ def movingaverage(y, window_size):
 def readable_output(filename):
     readable = ''
     # Example:
-    # learn_data-1000-1000-32-10000.csv
+    # path_data-128-128-100-10000-9.csv
     f_parts = filename.split('-')
 
-    if f_parts[0] == 'learn_data':
+    if f_parts[0] == 'path_data':
         readable += 'distance: '
     else:
         readable += 'loss: '
@@ -42,10 +42,12 @@ def plot_file(filename, type='loss'):
         reader = csv.reader(csvfile)
         # Turn our column into an array.
         y = []
+        x = []
         for row in reader:
             if type == 'loss':
                 y.append(float(row[0]))
             else:
+                x.append(float(row[0]))
                 y.append(float(row[1]))
 
         # Running tests will be empty.
@@ -57,9 +59,9 @@ def plot_file(filename, type='loss'):
         # Get the moving average so the graph isn't so crazy.
         if type == 'loss':
             window = 100
+            y_av = movingaverage(y, window)
         else:
-            window = 10
-        y_av = movingaverage(y, window)
+            y_av = y
 
         # Use our moving average to get some metrics.
         arr = np.array(y_av)
@@ -74,13 +76,15 @@ def plot_file(filename, type='loss'):
         # The -50 removes an artificial drop at the end caused by the moving
         # average.
         if type == 'loss':
-            plt.plot(y_av[:-50])
-            plt.ylabel('Smoothed Loss')
-            plt.ylim(0, 5000)
-            plt.xlim(0, 250000)
+            plt.plot(y_av)
+            plt.ylabel('Loss')
+            plt.xlabel('Num of Frames')
+            plt.ylim(0, 100000)
+          
         else:
-            plt.plot(y_av[:-5])
-            plt.ylabel('Smoothed Distance')
+            plt.plot(x, y_av)
+            plt.ylabel('Path Length')
+            plt.xlabel('Episode')
             plt.ylim(0, 4000)
 
         plt.savefig(f + '.png', bbox_inches='tight')
@@ -88,10 +92,10 @@ def plot_file(filename, type='loss'):
 
 if __name__ == "__main__":
     # Get our loss result files.
-    os.chdir("results")
+    os.chdir("results/logs-0")
 
-    for f in glob.glob("learn*.csv"):
-        plot_file(f, 'learn')
+    for f in glob.glob("path*.csv"):
+        plot_file(f, 'path')
 
     for f in glob.glob("loss*.csv"):
         plot_file(f, 'loss')
