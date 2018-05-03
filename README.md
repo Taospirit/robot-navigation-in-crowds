@@ -39,7 +39,7 @@ The state of the robot is a 3 elements vector. which is $[p_1,p_2,\theta]$.
 | OBSERVE   | Number of frames to observe before trainning  | 12000 |
 | epsilon   | The parameter for the $\epsilon$-greedy algorithm | 1 |
 | GAMMA     | The discount factor   |0.9    |
-| batchSize | Number of trainning records the network used to update it's value.    | 40, 100|
+| batchSize | Number of trainning records the network used to update it's value.    |40, 100|
 | bufferSize    | The length of the records saved in the memory.    | 10000 |
 | NUM_INPUT | Number of input values to the neural network. |   6   |
 |   FPS | Frames per second, used in the game environment.  |   60  |
@@ -96,5 +96,18 @@ The neural network model has two hidden layer. The first layer has input size of
 
 ## Experiments
 ### Tranning process
-$Y_k=\frac{1}{2r}\sum_{m=-r}^r y_{k+m}$
+As the number of hidden neurons per layer or the batch grows, the training speed goes down rapidly. So I set the parameters as above and begin trainning. The loss log for each frame is illustrated here:
+
+![loss-128](/results/logs/loss_data-128-128-100-10000-9.csv.png)
+![loss-256](/results/logs/loss_data-256-256-100-10000-9.csv.png)
+![loss-512](/results/logs/loss_data-512-512-100-10000-9.csv.png)
+
+Explanation:
+
+I also record the path length of the robot if it reach the goal in a training episode. They are illustrated here:
+
+![path-128](/results/logs/path_data-128-128-100-10000-9.csv.png)
+![path-256](/results/logs/path_data-256-256-100-10000-9.csv.png)
+![path-512](/results/logs/path_data-512-512-100-10000-9.csv.png)
+
 ### Testing process
