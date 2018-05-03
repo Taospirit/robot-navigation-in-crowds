@@ -103,6 +103,8 @@ As the number of hidden neurons per layer or the batch grows, the training speed
 ![loss-512](/results/logs/loss_data-512-512-100-10000-9.csv.png)
 
 Explanation:
+The name 128-128-100-10000-9 means the network has 128 neurons at first layer and 128 neurons at second layer. The batch size is 100 and the buffer size is 10000. 9 means it is recorded after 10 models(start from 0).
+
 The loss data has huge oscillation. when the network size is 128 and 256, the loss doesn't decreace or converge, which means poor trainning performance. When the network size is 256, it converge to a lower value, so it trains well.
 
 I also record the path length of the robot if it reach the goal in a training episode. They are illustrated here:
@@ -114,3 +116,11 @@ I also record the path length of the robot if it reach the goal in a training ep
 The robot will reach the goal 4 or 5 times in a trainning progress. The average length decrease when the neural network get more complicated, which means a more complex model represents the environment better.
 
 ### Testing process
+I record the model after every training episode and use these models for testing. In the test, the robot's movement is totally decided by the Q value, which means the policy is $a_t = max_a Q(s_t, a)$ for each action. The results of the testing is shown below:
+
+- test with model 128-128-100-10000-9
+![test-128](results\test\128-128-100-10000.png)
+- test with model 256-256-100-10000-9
+![test-256](results\test\128-128-100-10000.png)
+- test with model 512-512-100-10000-9
+![test-512](results\test\128-128-100-10000.png)
