@@ -14,24 +14,25 @@ import pymunk.pygame_util
 width = 1200
 height = 900
 pygame.init()
-screen = pygame.display.set_mode((width, height))
+screen = pygame.display.set_mode((width, height),RESIZABLE,32)
 clock = pygame.time.Clock()
 
-
 # Global variables
-sensor_range = 100
 robot_radius = 30
 robot_velocity = 200
 obs_radius = 30
 
-
 class GameClass:
-    def __init__(self, draw_screen, fps):
+    def __init__(self, draw_screen, display_path, fps):
         # Physics conditions.
         self.space = pymunk.Space()
         self.space.gravity = pymunk.Vec2d(0., 0.)
-        self.draw_screen = draw_screen
+        self.draw_screen = draw_screen 
+        self.display_path = display_path
         self.fps = fps
+
+        # Exit the game
+        self.exit = 0
 
         # Record num of steps
         self.num_steps = 0
@@ -40,26 +41,27 @@ class GameClass:
         self.hit = 0
 
         # Add borders in the space
-        self.add_borders();
+        self.add_borders()
 
         # Add the robot in the space.
-        # self.r_width = 80
-        # self.r_height = 60
         self.add_robot(100, 100)
 
         # Add some obstacles in the space
         # For now, the obstacles have fixed position
-        self.num_obstacles = 10
+        self.num_obstacles = 1
         self.add_obstacles(False) # if True, obstacles are randomly spanned in the space
 
         # Add the goal in the space
         self.add_goal(width - 100, height-100)
         self.reach_goal = 0
+        
+        # Track the path of the robot
+        self.path_holder = []
         # Draw stuffs on the screen
         self.draw_options = pymunk.pygame_util.DrawOptions(screen)
 
     def add_borders(self):
-        borders = [
+        self.borders = [
             pymunk.Segment(
                 self.space.static_body,
                 (0, 1), (0, height), 5),
@@ -71,18 +73,18 @@ class GameClass:
                 (width - 1, height), (width - 1, 1), 5),
             pymunk.Segment(
                 self.space.static_body,
-                (1, 1), (width, 1), 5)  # ,
+                (1, 1), (width, 1), 5)
             # pymunk.Segment(
             #     self.space.static_body,
             #     (width/2., 1), (width/2., height*0.75), 5)
         ]
-        for b in borders:
+        for b in self.borders:
             b.friction = 1.
             b.group = 1
             b.collision_type = 1
             b.color = THECOLORS['brown']
             b.elasticity = 1
-        self.space.add(borders)
+        self.space.add(self.borders)
 
     def add_robot(self, x, y):
         """Add a circle robot at a given position"""
@@ -123,17 +125,33 @@ class GameClass:
                 self.obstacles.append(self.add_obstacle(random.randint(obs_radius, width - obs_radius),
                                                     random.randint(obs_radius, height - obs_radius)))
         else:
-            self.obstacles.append(self.add_obstacle(390, 774))
-            self.obstacles.append(self.add_obstacle(917, 349))
-            self.obstacles.append(self.add_obstacle(660, 580))
-            self.obstacles.append(self.add_obstacle(730, 344))
-            self.obstacles.append(self.add_obstacle(712, 204))
-            self.obstacles.append(self.add_obstacle(431, 516))
-            self.obstacles.append(self.add_obstacle(1048, 199))
-            self.obstacles.append(self.add_obstacle(1155, 689))
-            self.obstacles.append(self.add_obstacle(660, 134))
-            self.obstacles.append(self.add_obstacle(826, 589))
+            # self.obstacles.append(self.add_obstacle(390, 774))
+            # self.obstacles.append(self.add_obstacle(917, 349))
+            # self.obstacles.append(self.add_obstacle(660, 580))
+            # self.obstacles.append(self.add_obstacle(730, 344))
+            # self.obstacles.append(self.add_obstacle(712, 204))
+            # self.obstacles.append(self.add_obstacle(431, 516))
+            # self.obstacles.append(self.add_obstacle(1048, 199))
+            # self.obstacles.append(self.add_obstacle(1155, 689))
+            # self.obstacles.append(self.add_obstacle(660, 134))
+            # self.obstacles.append(self.add_obstacle(826, 589))
 
+            self.obstacles.append(self.add_obstacle(600,450))
+
+    def draw_path(self):
+         # Update the path points and draw the path
+        position = np.array(self.robot_body.position)
+        position[1] = height-position[1]
+        if len(self.path_holder)>1:
+            notCollapes = np.linalg.norm(
+                self.path_holder[-1]-self.path_holder[-2]) >= 0.1
+            if notCollapes:
+                self.path_holder.append(position)
+            pygame.draw.aalines(
+                screen, THECOLORS["red"], False, self.path_holder)
+        else:
+            self.path_holder.append(position)
+            
     def add_goal(self, x, y):
         """Add the goal at a given position"""
         self.goal = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -153,31 +171,77 @@ class GameClass:
         readings = list([-100]*self.num_obstacles)
         for i, o in enumerate(self.obstacles):
             distance = self.robot_body.position.get_distance(o.body.position)
-            if distance <= sensor_range + obs_radius:
-                readings[i] = distance - robot_radius - obs_radius
+            readings[i] = distance - robot_radius - obs_radius
         return readings
 
+    def check_hit_obstacle(self):
+        for o_shape in self.obstacles:
+            if self.robot_shape.shapes_collide(o_shape).points:
+                print("Hit an obstacle!")
+                return True
+        return False
+
+    def check_hit_wall(self):
+        for b in self.borders:
+            if self.robot_shape.shapes_collide(b).points:
+                print("Hit the wall!")
+                return True
+        return False
+
     def check_reach_goal(self):
-        distance2goal = self.robot_body.position.get_distance(self.goal.position)
-        if distance2goal <= (robot_radius + self.goal_radius + 5):
-            screen.fill(THECOLORS["yellow"])
-            self.reach_goal = 1
+        if self.robot_shape.shapes_collide(self.goal_shape).points:
+            print("reach goal!")
             return True
         else:
             return False
 
+        # distance2goal = self.robot_body.position.get_distance(self.goal.position)
+        # if distance2goal <= (robot_radius + self.goal_radius + 5):
+        #     screen.fill(THECOLORS["yellow"])
+        #     self.reach_goal = 1
+        #     return True
+        # else:
+        #     return False
+
+    # def get_reward_0(self,readings):
+    #     reward = 0
+    #     distance2goal = self.robot_body.position.get_distance(self.goal.position)
+    #     if self.check_reach_goal():
+    #         reward = 10000
+    #     reward -= int(distance2goal/math.sqrt(width**2 + height**2) * 600)
+    #     for reading in readings:
+    #         if reading != -100: # the reading is valid
+    #             reward += int(200/(sensor_range-robot_radius) * reading - 200)
+    #     return reward
+
     def get_reward(self,readings):
-        reward = 0
-        distance2goal = self.robot_body.position.get_distance(self.goal.position)
+        reward = -self.num_steps/self.fps
+        # reward = 0
+        # for reading in readings:
+        #     if reading >= -5 and reading <=5:
+        #         reward -=50
+        #         print("Hit the obstacle!")
+        #         self.hit = 1
+        #         break
+        #     self.hit = 0    
+        if self.check_hit_obstacle():
+            reward -=50
+            self.hit = 1
+        else:
+            self.hit = 0
+            
+        if self.check_hit_wall():
+            reward -=50
+            self.hit = 1
+        else:
+            self.hit = 0
+
         if self.check_reach_goal():
-            reward = 10000
-        reward -= int(distance2goal/math.sqrt(width**2 + height**2) * 600)
-        for d in readings:
-            if d != -100: # the reading is valid
-                reward += int(200/(sensor_range-robot_radius) * d - 200)
+            reward += 10000
+            self.reach_goal = 1
         return reward
 
-    def second_step(self, action):
+    def frame_step(self, action):
         # Update the screen and stuff every second
         self.update(self.fps)
         self.num_steps += 1
@@ -201,55 +265,66 @@ class GameClass:
 
         # Use given action
         if action == 0: # Turn right
-            self.robot_body.velocity = self.robot_body.velocity.rotated_degrees(-45)
+            self.robot_body.velocity = self.robot_body.velocity.rotated_degrees(-5)
         elif action == 1: # Turn left
-            self.robot_body.velocity = self.robot_body.velocity.rotated_degrees(45)
+            self.robot_body.velocity = self.robot_body.velocity.rotated_degrees(5)
 
         # Exit the game
         for event in pygame.event.get():
-            if event.type == QUIT:
-                sys.exit(0)
-            elif event.type == KEYDOWN and (event.key in [K_ESCAPE, K_q]):
-                sys.exit(0)
+            if event.type == pygame.QUIT:
+                # sys.exit(0)
+                self.exit = 1
+            elif event.type == pygame.KEYDOWN and (event.key in [pygame.K_ESCAPE, pygame.K_q]):
+                # sys.exit(0)
+                self.exit = 1
 
         # Stop if reach the goal
         if self.check_reach_goal():
             self.robot_body.velocity = 0,0
-
+            self.reach_goal = 1
+            self.exit = 1
+            
         # Get the current state of the robot
         position = np.array(self.robot_body.position)
-        velocity = self.robot_body.velocity
+        angle = np.array(self.robot_body.angle)
         readings = self.get_sensor_data()
-        state = np.array(readings).reshape((self.num_obstacles,))
+        # state = np.array(readings).reshape((self.num_obstacles,))
+        state = np.hstack((position,angle))
         reward = self.get_reward(readings)
-        # print("state:",state)
-        print("action: %d, reward: %f, reach goal? %d" % (action, reward,self.reach_goal))
+        
+        # if self.hit or self.reach_goal:
+        #     print("action: %d, reward: %f, reach goal? %d" % (action, reward,self.reach_goal))
         return reward, state
 
     def update(self, fps):
         screen.fill(THECOLORS["white"])
+        if self.display_path:
+            self.draw_path()
         self.space.debug_draw(self.draw_options)
         self.space.step(1 / fps)
         if self.draw_screen:
             pygame.display.flip()
-        clock.tick(fps)
+            clock.tick(fps)
 
 
 
 if __name__ == "__main__":
 
-    game_class = GameClass(True,60)
-
+    game_class = GameClass(draw_screen = True, display_path = True, fps = 30)
+    
     # Game loop
-    while True:
-        action = 2
-        if game_class.num_steps % 100 ==0:
-            action = random.randint(0, 2)
-        else:
-            action = 2
-        reward, state = game_class.second_step(action)
-
-        # reward, state = game_class.second_step(random.randint(0, 2))
-        # reward, state = game_class.second_step(2)
+    while game_class.exit == 0:
+        # randomly set the action every 100 steps
+        # action = 2
+        # if game_class.num_steps % 100 ==0:
+        #     action = random.randint(0, 2)
+        # else:
+        #     action = 2
+        # reward, state = game_class.frame_step(action)
+        
+        reward, state = game_class.frame_step(random.randint(0, 2))
+        # reward, state = game_class.frame_step(2)
+    pygame.display.quit()
+    pygame.quit()
 
 #test
