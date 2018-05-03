@@ -92,6 +92,7 @@ The neural network is built up in the `nn.py` file. It is used to predict the va
 
 ![nn_model](https://github.com/haozhe15/robot-navigation-in-crowds/nn_model.png)
 
+
 ## Experiments
 ### Tranning process
 
