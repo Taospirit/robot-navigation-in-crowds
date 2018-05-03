@@ -5,7 +5,7 @@ http://outlace.com/Reinforcement-Learning-Part-3/
 # Note: change state, reward, experience replay, learning rate, l2 regularization, add bias 
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Dropout
-from keras.optimizers import RMSprop,Adam
+from keras.optimizers import RMSprop
 from keras.layers.recurrent import LSTM
 from keras.callbacks import Callback
 
@@ -43,7 +43,6 @@ def neural_net(num_inputs, params):
     model.add(Activation('linear'))
 
     rms = RMSprop()
-    adam = Adam(lr=0.001)
     model.compile(loss='mean_squared_error', optimizer=rms)
     # adam optimizer 10^-3
 
