@@ -90,7 +90,7 @@ Since $Q(s,a)$ is the average of $R(s,a)$ over all the states and actions after 
 
 The neural network is built up in the `nn.py` file. It is used to predict the value of $Q(s,a)$. The structure of the network is illustrated below:
 
-![nn_model](https://github.com/haozhe15/robot-navigation-in-crowds/nn_model)
+![nn_model](https://github.com/haozhe15/robot-navigation-in-crowds/nn_model.png)
 
 ## Experiments
 ### Tranning process
