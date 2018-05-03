@@ -48,7 +48,7 @@ class GameClass:
 
         # Add some obstacles in the space
         # For now, the obstacles have fixed position
-        self.num_obstacles = 1
+        self.num_obstacles = 10
         self.add_obstacles(False) # if True, obstacles are randomly spanned in the space
 
         # Add the goal in the space
@@ -125,18 +125,18 @@ class GameClass:
                 self.obstacles.append(self.add_obstacle(random.randint(obs_radius, width - obs_radius),
                                                     random.randint(obs_radius, height - obs_radius)))
         else:
-            # self.obstacles.append(self.add_obstacle(390, 774))
-            # self.obstacles.append(self.add_obstacle(917, 349))
-            # self.obstacles.append(self.add_obstacle(660, 580))
-            # self.obstacles.append(self.add_obstacle(730, 344))
-            # self.obstacles.append(self.add_obstacle(712, 204))
-            # self.obstacles.append(self.add_obstacle(431, 516))
-            # self.obstacles.append(self.add_obstacle(1048, 199))
-            # self.obstacles.append(self.add_obstacle(1155, 689))
-            # self.obstacles.append(self.add_obstacle(660, 134))
-            # self.obstacles.append(self.add_obstacle(826, 589))
+            self.obstacles.append(self.add_obstacle(390, 774))
+            self.obstacles.append(self.add_obstacle(917, 349))
+            self.obstacles.append(self.add_obstacle(660, 580))
+            self.obstacles.append(self.add_obstacle(730, 344))
+            self.obstacles.append(self.add_obstacle(712, 204))
+            self.obstacles.append(self.add_obstacle(431, 516))
+            self.obstacles.append(self.add_obstacle(1048, 199))
+            self.obstacles.append(self.add_obstacle(1155, 689))
+            self.obstacles.append(self.add_obstacle(660, 134))
+            self.obstacles.append(self.add_obstacle(826, 589))
 
-            self.obstacles.append(self.add_obstacle(600,450))
+            # self.obstacles.append(self.add_obstacle(600,450))
 
     def draw_path(self):
          # Update the path points and draw the path
@@ -195,35 +195,9 @@ class GameClass:
         else:
             return False
 
-        # distance2goal = self.robot_body.position.get_distance(self.goal.position)
-        # if distance2goal <= (robot_radius + self.goal_radius + 5):
-        #     screen.fill(THECOLORS["yellow"])
-        #     self.reach_goal = 1
-        #     return True
-        # else:
-        #     return False
-
-    # def get_reward_0(self,readings):
-    #     reward = 0
-    #     distance2goal = self.robot_body.position.get_distance(self.goal.position)
-    #     if self.check_reach_goal():
-    #         reward = 10000
-    #     reward -= int(distance2goal/math.sqrt(width**2 + height**2) * 600)
-    #     for reading in readings:
-    #         if reading != -100: # the reading is valid
-    #             reward += int(200/(sensor_range-robot_radius) * reading - 200)
-    #     return reward
-
     def get_reward(self,readings):
         reward = -self.num_steps/self.fps
-        # reward = 0
-        # for reading in readings:
-        #     if reading >= -5 and reading <=5:
-        #         reward -=50
-        #         print("Hit the obstacle!")
-        #         self.hit = 1
-        #         break
-        #     self.hit = 0    
+        
         if self.check_hit_obstacle():
             reward -=50
             self.hit = 1
@@ -314,15 +288,7 @@ if __name__ == "__main__":
     
     # Game loop
     while game_class.exit == 0:
-        # randomly set the action every 100 steps
-        # action = 2
-        # if game_class.num_steps % 100 ==0:
-        #     action = random.randint(0, 2)
-        # else:
-        #     action = 2
-        # reward, state = game_class.frame_step(action)
-        
-        reward, state = game_class.frame_step(random.randint(0, 2))
+            reward, state = game_class.frame_step(random.randint(0, 2))
         # reward, state = game_class.frame_step(2)
     pygame.display.quit()
     pygame.quit()

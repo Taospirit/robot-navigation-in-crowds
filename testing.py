@@ -41,16 +41,13 @@ def play(model):
 
 
 if __name__ == "__main__":
-    m=6
-    n=9
-    p=9
-    # reach goal(no path):
-    # reach goal: 11, 12
-    
-    # saved_model = load_model('saved-models/model_nn-1000-1000-100-10000-' + str(m)+ '.h5')
-    # saved_model = load_model('saved-models/model_nn-256-256-100-10000-' + str(m)+ '-noPath.h5')
-    # saved_model = load_model('saved-models/model_nn-128-128-100-10000-' + str(n)+ '.h5')
-    saved_model = load_model('saved-models/model_nn-512-512-100-10000-' + str(p)+ '.h5')
+    m=9 # for 128
+    n=9 # for 256
+    p=9 # for 512
 
+    # saved_model = load_model('saved-models/model_nn-128-128-100-10000-' + str(m)+ '.h5')
+    # saved_model = load_model('saved-models/model_nn-256-256-100-10000-' + str(n)+ '.h5')
+    saved_model = load_model('saved-models/model_nn-512-512-100-10000-' + str(p)+ '.h5')
+    
     play(saved_model)
 

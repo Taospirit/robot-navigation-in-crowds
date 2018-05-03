@@ -94,7 +94,7 @@ The neural network is built up in the `nn.py` file. It is used to predict the va
 
 The neural network model has two hidden layer. The first layer has input size of 6, which is equal to the size of the feature. In initialization I set a LeCun normal initializer and the bias initialize to zero. The activation function is ReLU for all the layers except the output layer, which is linear. To prevent overfit, dropout is added. In compilation, I use RMSprop optimizer and mean square loss as loss function.
 
-## Experiments
+## 5. Experiments
 ### Tranning process
 As the number of hidden neurons per layer or the batch grows, the training speed goes down rapidly. So I set the parameters as above and begin trainning. The loss log for each frame is illustrated here:
 
@@ -116,17 +116,36 @@ I also record the path length of the robot if it reach the goal in a training ep
 The robot will reach the goal 4 or 5 times in a trainning progress. The average length decrease when the neural network get more complicated, which means a more complex model represents the environment better.
 
 ### Testing process
-I record the model after every training episode and use these models for testing. In the test, the robot's movement is totally decided by the Q value, which means the policy is $a_t = max_a Q(s_t, a)$ for each action. The results of the testing is shown below:
+I record the model after every training episode and use these models for testing. In the test, the robot's movement is totally decided by the Q value, which means the policy is $a_t = max_a Q(s_t, a)$ for each action. The robot always start at the same point in the left bottom area. The path of the robot is illustrated by the red lines. The results of the testing is shown below:
 
-Test with model 128-128-100-10000-9
+- Test with model 128-128-100-10000-9
 
-![test-128](results\test\128-128-100-10000.png)
+![test-128](/results/test/128-128-100-10000-9.png)
 
-Test with model 256-256-100-10000-9
+The robot always choose action turn right and stucked in a circle.
 
-![test-256](results\test\128-128-100-10000.png)
+- Test with model 256-256-100-10000-9
 
-Test with model 512-512-100-10000-9
+![test-256](/results/test/256-256-100-10000-9.png)
 
-![test-512](results\test\128-128-100-10000.png)
+The robot learns to avoid to be near the obstacles but limit itself in the left bottom corner.
 
+- Test with model 512-512-100-10000-9
+
+![test-512](/results/test/512-512-100-10000-9.png)
+
+The robot learns to avoid obstacles and strolls in the environment and will reach the goal.
+
+In addition, the model that performs best is not the ones at the last episode. The model trained at episode 5 for 512*512 network performs best:
+- Test with model 512-512-100-10000-5
+
+![test-512-5](/results/test/512-512-100-10000-5.png)
+
+The robot learns to move near the wall and reach the goal. This means the test performance oscillates much and it's hard for the model to generalize well. Due to the limitation of the computational power of the my laptop, the parameters need to be larger to get better result. 
+
+So The poor performance comes from the less complex model, small trainning episode and frame times, and the osilation of the model in the trainning process. In the future, these aspects needs to be improved.
+
+## Reference
+- Mnih,Kavukcuoglu,Playing Atari with Deep Reinforcement Learning, 2013
+- [Q-learning with Neural Networks](http://outlace.com/rlpart3.html)
+- [Using reinforcement learning in Python to teach a virtual car to avoid obstacles](https://blog.coast.ai/using-reinforcement-learning-in-python-to-teach-a-virtual-car-to-avoid-obstacles-6e782cc7d4c6)
