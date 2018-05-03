@@ -119,8 +119,14 @@ The robot will reach the goal 4 or 5 times in a trainning progress. The average 
 I record the model after every training episode and use these models for testing. In the test, the robot's movement is totally decided by the Q value, which means the policy is $a_t = max_a Q(s_t, a)$ for each action. The results of the testing is shown below:
 
 - test with model 128-128-100-10000-9
+
 ![test-128](results\test\128-128-100-10000.png)
+
 - test with model 256-256-100-10000-9
+
 ![test-256](results\test\128-128-100-10000.png)
+
 - test with model 512-512-100-10000-9
+
 ![test-512](results\test\128-128-100-10000.png)
+
