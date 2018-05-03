@@ -92,6 +92,7 @@ The neural network is built up in the `nn.py` file. It is used to predict the va
 
 ![nn_model](/nn_model.png)
 
+The neural network model has two hidden layer. The first layer has input size of 6, which is equal to the size of the feature. In initialization I set a LeCun normal initializer and the bias initialize to zero. The activation function is ReLU for all the layers except the output layer, which is linear. To prevent overfit, dropout is added. In compilation, I use RMSprop optimizer and mean square loss as loss function.
 
 ## Experiments
 ### Tranning process
